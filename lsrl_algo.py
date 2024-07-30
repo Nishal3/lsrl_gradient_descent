@@ -57,7 +57,21 @@ if __name__ == '__main__':
     # Changing from the lazy zip iterator to a normal list
     data = list(zip(x, y, z, strict=True))
 
-    epochs = 1000
+    data = [
+        (0.4, 0.681, 0.237),
+        (2.36, 5.634, 8.177),
+        (6.413, 2.104, 3.126),
+        (17.419, 22.034, 29.193),
+        (22.78, 13.524, 6.192),
+        (31.03, 36.753, 21.017),
+        (26.6, 40.423, 44.091),
+        (59.431, 54.743, 20.141),
+        (52.478, 14.786, 38.24),
+        (33.527, 13.546, 50.097),
+        (34.375, 93.439, 83.492)
+    ]
+
+    epochs = 1
 
     m_1, m_2, b = 0, 0, 0
     # Loop to see how the variables and MSE get minimized
