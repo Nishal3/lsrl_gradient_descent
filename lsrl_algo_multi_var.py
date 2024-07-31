@@ -4,6 +4,63 @@ from typing import Union, Sequence
 Num = Union[int, float]
 
 
+def residual_sum_of_squares(data: Sequence[Sequence[Num]], vector_w: Sequence[Num], b: Num) -> Num:
+    """
+    Returns the residual sum of squares (RSS) with the given data, weights, and intercept.
+
+    Variables:
+    data:       A tuple with tuples inside representing points on an n dimensional grid
+    vector_w:   A tuple of weights corresponding to a feature of a point
+    b:          A number which represents the intercept
+
+    >>> _data = ((0.022, 0.12, 0.01), (0.859, 4.963, 1.548), (13.324, 2.714, 19.352),\
+                 (17.454, 26.582, 1.066), (10.907, 1.249, 34.12), (22.627, 36.543, 18.503),\
+                 (26.145, 9.041, 34.738), (26.848, 36.133, 37.874), (31.201, 18.57, 33.332),\
+                 (73.594, 44.598, 81.683), (82.6, 3.817, 91.421))
+    >>> _vector_w, _b = (0, 0), 0
+    >>> residual_sum_of_squares(_data, _vector_w, _b)
+    20666.670547
+    :param data:
+    :param vector_w:
+    :param b:
+    :return:
+    """
+    rss = 0
+    for point in data:
+        rss += point_square_error(point, vector_w, b)
+
+    return rss
+
+def point_square_error(point: Sequence[Num], vector_w: Sequence[Num], b: Num) -> Num:
+    """
+    Calculates the square error at a given point.
+
+    Variables:
+    data:       A tuple with tuples inside representing points on an n dimensional grid
+    vector_w:   A tuple of weights corresponding to a feature of a point
+    b:          A number which represents the intercept
+
+    >>> _point = (0.4, 0.681, 0.237)
+    >>> _vector_w, _b = (0, 0), 0
+    >>> point_square_error(_point, _vector_w, _b)
+    0.056169
+
+    :param point:
+    :param vector_w:
+    :param b:
+    :return:
+    """
+
+    # Error always has a +b at the end
+    error = b
+
+    for index, feature in enumerate(point[:-1]):
+        error += vector_w[index] * feature
+
+    error = (error - point[-1]) ** 2
+
+    return error
+
 def gradient_descent_input_validation(data: Sequence[Sequence[Num]], len_vector_w: int) -> bool:
     """
     Checks whether `data` has enough variables inside each individual data point to match with the slopes.
@@ -25,9 +82,6 @@ def gradient_descent_input_validation(data: Sequence[Sequence[Num]], len_vector_
     if not data:
         return False
 
-    if not len_vector_w:
-        return False
-
     for point in data:
         if len(point) != len_vector_w + 1:
             return False
@@ -35,7 +89,7 @@ def gradient_descent_input_validation(data: Sequence[Sequence[Num]], len_vector_
     return True
 
 
-def gradient_descent(data: Sequence[Sequence[Num]], vector_w: Sequence[Num], b: Num, alpha=0.001) -> Sequence[Num]:
+def gradient_descent(data: Sequence[Sequence[Num]], vector_w: Sequence[Num], b: Num, alpha=0.001) -> (Num, Sequence[Num]):
     """
     Ran repeatedly, this function minimizes the mean squared error(MSE) cost function for linear regression for N Variables
 
@@ -48,16 +102,24 @@ def gradient_descent(data: Sequence[Sequence[Num]], vector_w: Sequence[Num], b: 
     alpha:          The learning rate, default is 0.001
 
 
-    #>>> _data = (
-    #>>> (17.454, 26.582, 1.066), (10.907, 1.249, 34.12), (22.627, 36.543, 18.503),
-    #>>> (26.145, 9.041, 34.738), (26.848, 36.133, 37.874), (31.201, 18.57, 33.332),
-    #>>> (73.594, 44.598, 81.683), (82.6, 3.817, 91.421)
-    #>>> )
-    #>>>
-    #>>> _w = (0, 0)
-    #>>> _b = 0
-    #>>> gradient_descent(_data, _w, _b)
-    (-32.14972727272727, -1599.6733982727274, -645.5188912727273)
+    >>> _data = (\
+            (0.4, 0.681, 0.237),\
+            (2.36, 5.634, 8.177),\
+            (6.413, 2.104, 3.126),\
+            (17.454, 26.582, 1.066),\
+            (10.907, 1.249, 34.12),\
+            (22.627, 36.543, 18.503),\
+            (26.145, 9.041, 34.738),\
+            (26.848, 36.133, 37.874),\
+            (31.201, 18.57, 33.332),\
+            (73.594, 44.598, 81.683),\
+            (82.6, 3.817, 91.421)\
+       )
+    >>>
+    >>> _w = (0, 0)
+    >>> _b = 0
+    >>> gradient_descent(_data, _w, _b)
+    (0.03129790909090909, [1.5796973580909088, 0.6448463882727273])
 
     :param data:
     :param vector_w:
@@ -65,6 +127,7 @@ def gradient_descent(data: Sequence[Sequence[Num]], vector_w: Sequence[Num], b: 
     :param alpha:
     :return:
     """
+
     dim = len(data[0])
     len_data = len(data)
     # Handling b separately
@@ -85,12 +148,17 @@ def gradient_descent(data: Sequence[Sequence[Num]], vector_w: Sequence[Num], b: 
         b_gradient += cur_derivative
         tabulated_derivatives[index] = cur_derivative
 
+    # Updating term b
+    b_gradient = b - alpha * b_gradient
+
     # Utilizing tabulation to increase efficiency
     cur_weight_index = 0
     while cur_weight_index < dim - 1:
         for index, point in enumerate(data):
             gradients[cur_weight_index] += tabulated_derivatives[index] * point[cur_weight_index]
 
+        # Updating the weights
+        gradients[cur_weight_index] = vector_w[cur_weight_index] - alpha * gradients[cur_weight_index]
         cur_weight_index += 1
 
     return b_gradient, gradients
@@ -106,6 +174,14 @@ def derivative_of_point(point: Sequence[Num], vector_w: Sequence[Num], b: Num, l
     b:              y-intercept, when all x_vectors(input variables) are 0, y(output variable) is predicted to be b
     len_data:       Number of points present in data
     deriv_index:    The index of a weight which you want to take the derivative with respect to
+
+    >>> _point = (0.4, 0.681, 0.237)
+    >>> _vector_w, _b = (1, 1), 0
+    >>> _len_data = 11
+    >>> _deriv_index = 0
+    >>> derivative_of_point(_point, _vector_w, _b, _len_data, _deriv_index)
+    0.03069090909090909
+
 
     :param point:
     :param vector_w:
@@ -154,29 +230,31 @@ if __name__ == '__main__':
 
     data = list(zip(x, y, z, strict=True))
 
-    data = [
+    data = (
         (0.4, 0.681, 0.237),
         (2.36, 5.634, 8.177),
         (6.413, 2.104, 3.126),
-        (17.419, 22.034, 29.193),
-        (22.78, 13.524, 6.192),
-        (31.03, 36.753, 21.017),
-        (26.6, 40.423, 44.091),
-        (59.431, 54.743, 20.141),
-        (52.478, 14.786, 38.24),
-        (33.527, 13.546, 50.097),
-        (34.375, 93.439, 83.492)
-    ]
+        (17.454, 26.582, 1.066),
+        (10.907, 1.249, 34.12),
+        (22.627, 36.543, 18.503),
+        (26.145, 9.041, 34.738),
+        (26.848, 36.133, 37.874),
+        (31.201, 18.57, 33.332),
+        (73.594, 44.598, 81.683),
+        (82.6, 3.817, 91.421)
+    )
     slopes = (0, 0)
-    """data = [
-        (0.022, 0.12, 0.01), (0.859, 4.963, 1.548), (13.324, 2.714, 19.352),
-        (17.454, 26.582, 1.066), (10.907, 1.249, 34.12), (22.627, 36.543, 18.503),
-        (26.145, 9.041, 34.738), (26.848, 36.133, 37.874), (31.201, 18.57, 33.332),
-        (73.594, 44.598, 81.683), (82.6, 3.817, 91.421)]
-"""
-    epochs = 1000
+    b = 0
+
+    epochs = 100000
 
     # Still working on the function
     error_deriv = 0
 
-    print(gradient_descent(data, slopes, 0))
+    for i in range(epochs):
+        print(f"RSS: {residual_sum_of_squares(data, slopes, b)}", end="\t")
+        b, slopes = gradient_descent(data, slopes, b)
+        print(f"Vector W: {slopes}\tb: {b}")
+
+    print(data)
+

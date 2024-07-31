@@ -9,7 +9,7 @@ def mean_squared_error_2d(data, m, b):
     return error
 
 
-def gradient_descent_2d(data, m, b, lr=0.0001):
+def gradient_descent_2d(data, m, b, lr=0.001):
     b_gradient = 0  # Derivitave of MSE formula w/ respect to b: 1 / len(data) * (sum(x_1 * m_1 + b - y))
     m_gradient = 0  # Derivative of MSE formula w/ respect to m: 1 / len(data) * (sum(x_1 * m_1 + b - y) * x_1)
 
@@ -27,12 +27,12 @@ def gradient_descent_2d(data, m, b, lr=0.0001):
 def mean_squared_error_3d(data, m_1, m_2, b):
     error = 0
     for x, y, z in data:
-        error = ((x * m_1 + y * m_2 + b) - z) ** 2  # MSE with more variables is not that bad, pretty intuitive
+        error += ((x * m_1 + y * m_2 + b) - z) ** 2  # MSE with more variables is not that bad, pretty intuitive
 
     return error
 
 
-def gradient_descent_3d(data, m_1, m_2, b, lr=0.00005):
+def gradient_descent_3d(data, m_1, m_2, b, lr=0.001):
     b_gradient = 0
     m_1_gradient = 0
     m_2_gradient = 0
@@ -57,19 +57,19 @@ if __name__ == '__main__':
     # Changing from the lazy zip iterator to a normal list
     data = list(zip(x, y, z, strict=True))
 
-    data = [
-        (0.4, 0.681, 0.237),
-        (2.36, 5.634, 8.177),
-        (6.413, 2.104, 3.126),
-        (17.419, 22.034, 29.193),
-        (22.78, 13.524, 6.192),
-        (31.03, 36.753, 21.017),
-        (26.6, 40.423, 44.091),
-        (59.431, 54.743, 20.141),
-        (52.478, 14.786, 38.24),
-        (33.527, 13.546, 50.097),
-        (34.375, 93.439, 83.492)
-    ]
+    data = (
+        (0.022, 0.12, 0.01),
+        (0.859, 4.963, 1.548),
+        (13.324, 2.714, 19.352),
+        (17.454, 26.582, 1.066),
+        (10.907, 1.249, 34.12),
+        (22.627, 36.543, 18.503),
+        (26.145, 9.041, 34.738),
+        (26.848, 36.133, 37.874),
+        (31.201, 18.57, 33.332),
+        (73.594, 44.598, 81.683),
+        (82.6, 3.817, 91.421)
+    )
 
     epochs = 1
 
