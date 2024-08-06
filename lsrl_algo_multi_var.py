@@ -31,6 +31,7 @@ def residual_sum_of_squares(data: Sequence[Sequence[Num]], vector_w: Sequence[Nu
 
     return rss
 
+
 def point_square_error(point: Sequence[Num], vector_w: Sequence[Num], b: Num) -> Num:
     """
     Calculates the square error at a given point.
@@ -60,6 +61,7 @@ def point_square_error(point: Sequence[Num], vector_w: Sequence[Num], b: Num) ->
     error = (error - point[-1]) ** 2
 
     return error
+
 
 def gradient_descent_input_validation(data: Sequence[Sequence[Num]], len_vector_w: int) -> bool:
     """
@@ -224,37 +226,75 @@ def dot_product(vector_1: Sequence[Num], vector_2: Sequence[Num]) -> Num:
 
 
 if __name__ == '__main__':
-    x, y, z = [round(random() * i, 3) for i in range(1, 102, 10)],\
-              [round(random() * i, 3) for i in range(1, 102, 10)],\
-              [round(random() * i, 3) for i in range(1, 102, 10)]
+    x_1, x_2, x_3, x_4, y = [round(random() * i, 3) for i in range(1, 302, 10)],\
+                            [round(random() * i, 3) for i in range(1, 302, 10)],\
+                            [round(random() * i, 3) for i in range(1, 302, 10)], \
+                            [round(random() * i, 3) for i in range(1, 302, 10)], \
+                            [round(random() * i, 3) for i in range(1, 302, 10)]
 
-    data = list(zip(x, y, z, strict=True))
+    data = list(zip(x_1, x_2, x_3, x_4, y, strict=True))
 
-    data = (
-        (0.4, 0.681, 0.237),
-        (2.36, 5.634, 8.177),
-        (6.413, 2.104, 3.126),
-        (17.454, 26.582, 1.066),
-        (10.907, 1.249, 34.12),
-        (22.627, 36.543, 18.503),
-        (26.145, 9.041, 34.738),
-        (26.848, 36.133, 37.874),
-        (31.201, 18.57, 33.332),
-        (73.594, 44.598, 81.683),
-        (82.6, 3.817, 91.421)
-    )
-    slopes = (0, 0)
+    data = [
+        (0.947, 0.069, 0.049, 0.422, 0.959),
+        (3.972, 7.135, 6.125, 3.582, 1.173),
+        (11.605, 4.137, 14.572, 19.487, 3.039),
+        (24.372, 1.776, 16.801, 29.49, 8.776),
+        (36.793, 20.936, 7.964, 10.133, 38.081),
+        (46.993, 31.403, 5.308, 40.767, 19.54),
+        (51.587, 51.657, 27.492, 45.865, 10.166),
+        (2.658, 26.644, 20.193, 58.62, 40.012),
+        (53.849, 70.173, 6.231, 76.131, 36.023),
+        (57.725, 34.147, 17.841, 11.9, 67.829),
+        (42.601, 39.466, 71.017, 22.283, 50.507),
+        (67.373, 58.687, 91.953, 98.258, 64.883),
+        (49.563, 115.165, 64.014, 73.911, 78.989),
+        (1.517, 34.172, 95.117, 113.533, 98.634),
+        (114.802, 126.242, 134.569, 21.775, 80.694),
+        (96.475, 19.213, 68.311, 51.152, 23.012),
+        (110.102, 17.381, 146.669, 83.144, 37.191),
+        (138.29, 168.176, 113.124, 60.164, 132.129),
+        (152.971, 22.464, 152.705, 7.406, 53.82),
+        (84.744, 34.864, 162.623, 88.5, 116.504),
+        (96.901, 114.803, 20.004, 33.116, 161.335),
+        (192.289, 37.189, 119.698, 129.761, 139.648),
+        (187.404, 17.527, 62.682, 200.427, 48.879),
+        (155.202, 70.622, 48.778, 154.372, 201.747),
+        (158.156, 230.659, 11.999, 52.575, 111.314),
+        (18.019, 210.309, 125.784, 135.992, 210.03),
+        (243.423, 253.945, 58.889, 12.554, 206.166),
+        (253.111, 227.966, 190.903, 4.849, 60.632),
+        (31.143, 75.02, 229.155, 177.753, 182.937),
+        (201.132, 268.054, 234.399, 192.327, 18.664),
+        (152.436, 190.912, 166.253, 294.933, 108.876)
+    ]
+
+    slopes = (1, 1, 1, 1)
     b = 0
 
+    # There are two ways you can run this: number of iterations/epochs or acceptable error. I recommend epochs
+    # but you can also do acceptable error if that's what you want
     epochs = 100000
 
-    # Still working on the function
-    error_deriv = 0
-
+    # This is for epochs
     for i in range(epochs):
         print(f"RSS: {residual_sum_of_squares(data, slopes, b)}", end="\t")
-        b, slopes = gradient_descent(data, slopes, b)
+        b, slopes = gradient_descent(data, slopes, b, alpha=0.00005)  # Increase or decrease alpha if necessary
         print(f"Vector W: {slopes}\tb: {b}")
 
+    # Acceptable error method
+    # acceptable_round_off = 5  # number of decimal places to round. can be negative
+    # prev_error = 0
+    # cur_error = residual_sum_of_squares(data, slopes, b)
+    # epochs = 0
+
+    # while round(prev_error, acceptable_round_off) != round(cur_error, acceptable_round_off):
+    #     prev_error = cur_error
+    #     b, slopes = gradient_descent(data, slopes, b, alpha=0.00005)  # Increase or decrease alpha if necessary
+    #     cur_error = residual_sum_of_squares(data, slopes, b)
+    #     print(f"RSS: {residual_sum_of_squares(data, slopes, b)}", end="\t")
+    #     print(f"Vector W: {slopes}\tb: {b}")
+    #     epochs += 1
+
     print(data)
+    print(f"Number of iterations: {epochs}")
 
